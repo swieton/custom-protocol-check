@@ -140,7 +140,7 @@ const openUriWithHiddenFrame = (uri, failCb, successCb) => {
     iframe = createHiddenIframe(document.body, "about:blank");
   }
 
-  onBlur = () => {
+  onBlur = (e) => {
     clearTimeout(timeout);
     handler.remove();
     successCb();
@@ -169,6 +169,19 @@ const openUriWithTimeoutHack = (uri, failCb, successCb) => {
   };
 
   const handler = registerEvent(target, "blur", onBlur);
+
+  window.location.href = uri;
+};
+
+const openUriWithVisibilityTimeoutHack = (uri, failCb, successCb) => {
+  const timeout = setTimeout(function() {
+    const succeeded = !document.hasFocus() || document.hidden;
+    if(succeeded) {
+      successCb();
+    } else {
+      failCb();
+    }
+  }, DEFAULT_CUSTOM_PROTOCOL_FAIL_CALLBACK_TIMEOUT);
 
   window.location.href = uri;
 };
@@ -240,7 +253,12 @@ const protocolCheck = (uri, failCb, successCb, timeout = 2000, unsupportedCb) =>
         openUriUsingFirefox(uri, failCallback, successCallback);
       }
     } else if (browser.isChrome()) {
-      openUriWithTimeoutHack(uri, failCallback, successCallback);
+      const browserVersion = getBrowserVersion();
+      if (browserVersion <= 85) {
+        openUriWithTimeoutHack(uri, failCallback, successCallback);
+      } else {
+        openUriWithVisibilityTimeoutHack(uri, failCallback, successCallback);
+      }
     } else if (browser.isOSX()) {
       openUriWithHiddenFrame(uri, failCallback, successCallback);
     } else {

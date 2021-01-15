@@ -8,7 +8,8 @@ The implementation is different from one browser to another, sometimes depend on
 
 _**Important feature:** If current tab is not active when it's trying to detect focus then it would attempt to open protocol as soon as focus is back on current tab. It is more useful when there is a long running process and at the end of that process we need to detect whether that file can be opened using custom protocol. User might be doing his work on different tabs or applications so in such cases library would try to detect custom protocol as soon as current tab gets focus._
 
-- Chrome and iOS: using window onBlur to detect whether the focus is stolen from the browser. When the focus is stolen, it assumes that the custom protocol launches external app and therefore it exists.
+- Chrome (v85 and below) and iOS: using window onBlur to detect whether the focus is stolen from the browser. When the focus is stolen, it assumes that the custom protocol launches external app and therefore it exists.
+- Chrome (v86 and above): onBlur doesn't fire, so pause and simply check if the document has lost focus or is hidden.
 - Firefox (Version >= 64): using hidden iframe onBlur to detect whether the focus is stolen. When the focus is stolen, it assumes that the custom protocol launches external app and therefore it exists.
 - Firefox (Version < 64): try to open the handler in a hidden iframe and catch exception if the custom protocol is not available.
 - Safari: using hidden iframe onBlur to detect whether the focus is stolen. When the focus is stolen, it assumes that the custom protocol launches external app and therefore it exists.
